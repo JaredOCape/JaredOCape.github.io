@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html> 
+
+<head>
+    <title> NH Poltical Mapping</title>  
+    <meta charset="shift_jis">
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>  
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script> 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+     <link rel="stylesheet" type="text/css" href="StyleMap.css">
+     <style>
+    .info { padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif; background: white; background: rgba(255,255,255,0.8); box-shadow: 0 0 15px rgba(0,0,0,0.2); border-radius: 5px; } .info h4 { margin: 0 0 5px; color: #777; }
+.legend { text-align: left; line-height: 18px; color: #555; } .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
+</style>
+    </head>
+
+<body>
+    <h1> NH Political Breakdown </h1> 
+    <div id="left"> 
+        <h6> Tile Layers</h6>
+        <button id="tile1">Simple</button>
+        <button id="tile2">Complex</button>
+        <h6> Party Affiliation Layers</h6>
+        <button id="democrt">Democrat</button>
+        <button id="repblcn"> Republican</button>
+    </div>
+    
+   <div id="map">  
+    <script defer> 
+        $(document).ready( function() {
+        var map = L.map('map',{ center: [44.000000, -71.500000], zoom: 8}); 
+        var tile1 = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+	                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>', subdomains: 'abcd', maxZoom: 19}) .addTo(map);
+        var tile2 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+	                attribution: 'Tiles&copy;Esri&mdash;National Geographic,Esri,DeLorme,NAVTEQ, NEP-WCMC,USGS,NASA,ESA,METI,NRCAN,GEBCO,NOAA, iPC', maxZoom: 16});
+        $("#tile1").click( function() {
+        tile2.removeFrom(map);
+        tile1.addTo(map);
+      });
+      $("#tile2").click( function() {
+        tile1.removeFrom(map);
+        tile2.addTo(map);
+      })
+
+      
+        
+        
+        function getColor(d) {
+         return 
+                d > 20000 ? '#93003a' :
+                d > 15000 ? '#ac0d44' :
+                d > 10000 ? '#c1254f' : 
+                d > 9000 ? '#d33c5c' :
+                d > 8000 ? '#e25469' :
+                d > 7000 ? '#ef6b78' :
+                d > 6000 ? '#f88387' : 
+                d > 5000 ? '#ff9c98' :
+                d > 4000 ? '#ffb6aa' :
+                d > 3000 ? '#ffcfbc' :
+                d > 2000 ? '#ffe7ce' : 
+                d > 1000 ? '#d1f3e0' :
+                d > 900 ? '#b5e2dc' :
+                d > 800 ? '#9fd0d6' :
+                d > 700 ? '#8cbed0' : 
+                d > 600 ? '#7bacca' :
+                d > 500 ? '#6b99c3' :
+                d > 400 ? '#5b87bc' :
+                d > 300 ? '#4b75b4' : 
+                d > 200 ? '#3a64ad' :
+                d > 100 ? '#2653a5' :
+                         '#00429d';
+                }; 
+
+       // control that shows state info on hover
+	var info = L.control();
+
+	info.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'info');
+		this.update();
+		return this._div;
+	};
+
+	info.update = function (props) {
+		this._div.innerHTML = '<h4>Town Party Affiliation</h4>' + (props ?
+			'' + props.name
+                        + '<br>Democrats:' + props.democrt
+                        + '<br>Republicans: ' + props.repblcn
+                        + '<br>Third Party Voters: ' + props.thrd_pr 
+                        + '<br>Scatter: ' + props.scatter
+                        : 'Hover over a neighborhood');
+	};
+//info.update = function(props) { 
+//    this._div.innerHTML = 'test'; };
+	info.addTo(map);
+
+        function highlightFeature(e) {
+		var layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer.bringToFront();
+		}
+
+		info.update(layer.feature.properties);
+        };
+
+        function resetHighlight(e) {
+		town.resetStyle(e.target);
+		info.update();
+	}
+
+	function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	}
+
+	function onEachFeature(feature, layer) {
+		layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: zoomToFeature
+		});
+	}
+
+      function styleD(feature) {
+         return {
+           fillColor: getColor(feature.properties.democrt),
+           weight: 2,
+           opacity: 1,
+           color: 'white',
+           dashArray: '3',
+           fillOpacity: 0.7
+        };
+      }
+
+      function styleR(feature) {
+         return {
+           fillColor: getColor(feature.properties.repblcn),
+           weight: 2,
+           opacity: 1,
+           color: 'white',
+           dashArray: '3',
+           fillOpacity: 0.7
+        };
+      };
+
+      var mydata;
+      // load the neighborhoods
+      $.getJSON("NH_PB_Town.json", function (data) { mydata = data; });
+
+      // add GeoJSON layer to the map once the file is loaded
+      var town = L.geoJson(mydata, { style: styleR, onEachFeature: onEachFeature }).addTo(map);
+
+      // if the checkbox is clicked, act on it
+      $("#repblcn").click( function() {
+        town.removeFrom(map);
+        town = L.geoJson(mydata, { style: styleR, onEachFeature: onEachFeature }).addTo(map);
+      });
+
+      // if the checkbox is clicked, act on it
+      $("#democrt").click( function() {
+        town.removeFrom(map);
+        town = L.geoJson(mydata, { style: styleD, onEachFeature: onEachFeature }).addTo(map);
+      });
+
+	var legend = L.control({position: 'bottomright'});
+
+	legend.onAdd = function (map) {
+
+		var div = L.DomUtil.create('div', 'info legend'),
+			grades = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000,3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 15000, 20000, 25000],
+			labels = [],
+			from, to;
+
+		for (var i = 0; i < (grades.length-1); i++) {
+			from = grades[i];
+			to = grades[i + 1];
+
+			labels.push(
+				'<i style="background:' + getColor(from + 1) + '"></i> ' +
+				from + (to ? '–' + to : '+'));
+		}
+
+		div.innerHTML = labels.join('<br>');
+		return div;
+	};
+
+	legend.addTo(map);
+        
+});
+        
+        
+    </script> 
+       </div>
+</body>
+
+
+
+</html> 
