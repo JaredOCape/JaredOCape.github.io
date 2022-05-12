@@ -1,0 +1,41 @@
+
+body {
+        background-color: floralwhite;
+        font-family: arial, sans-serif;
+        font-size: 30px;
+        color: gray;
+        display: block;
+}
+
+p, li, ul, h2, #buttons, #map , div { 
+        margin-left: auto; 
+        margin-right: auto; 
+        text-align: center;}
+
+h1 {    margin-left: auto;
+        margin-right: auto; 
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        margin-right: 0px;
+        margin-left: 0px;}
+h6 {    margin-left: auto;
+        margin-right: auto; 
+        text-align: center;
+        margin-top: 30px;
+        margin-bottom: 0px;
+        margin-right: 0px;
+        margin-left: 0px;}
+#left {
+        float: left;
+        margin-left: 20px;
+        width: 690px; 
+        height: 690px}
+#map {
+        /*width: 60%;
+        height:100%;*/
+        float: right;
+        margin-right: 20px;
+        width: 690px; 
+        height: 690px
+}
